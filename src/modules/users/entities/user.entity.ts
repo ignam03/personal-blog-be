@@ -3,6 +3,15 @@ import { Article } from 'src/modules/articles/entities/article.entity';
 
 @Table
 export class User extends Model<User> {
+
+  
+  @Column({
+    type: DataType.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  })
+  id: number;
+
   @Column({
     type: DataType.STRING,
     allowNull: false,
@@ -11,13 +20,13 @@ export class User extends Model<User> {
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
+    allowNull: true,
   })
   lastName: string;
 
   @Column({
     type: DataType.DATE,
-    allowNull: false,
+    allowNull: true,
   })
   birthDate: Date;
 
@@ -30,14 +39,14 @@ export class User extends Model<User> {
   @Column({
     type: DataType.ENUM,
     values: ['admin', 'user'],
-    allowNull: false,
+    allowNull: true,
   })
   role: string;
 
   @Column({
     type: DataType.ENUM,
     values: ['male', 'female'],
-    allowNull: false,
+    allowNull: true,
   })
   gender: string;
 

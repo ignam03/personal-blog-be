@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, HttpException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -10,23 +10,43 @@ export class UsersService {
     private userRepository: typeof User,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const createUser = await this.userRepository.create(createUserDto);
+    return createUser;
   }
 
-  findAll(): Promise<User[]> {
-    return this.userRepository.findAll();
+  async fetchAll(): Promise<User[]> {
+    return await this.userRepository.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async fetchById(id: number): Promise<User> {
+    const user = await this.userRepository.findOne<User>({ where: { id } });
+    if (!user) throw new HttpException('User not found', 404);
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async fetchByEmail(email: string): Promise<User> {
+    const user = await this.userRepository.findOne<User>({ where: { email } });
+    if (!user) throw new HttpException('User not found', 404);
+    return user;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<any> {
+    const user = await this.userRepository.findOne<User>({ where: { id } });
+    if (!user) throw new HttpException('User not found', 404);
+    const userUpdate = {
+      ...user,
+      ...updateUserDto,
+    };
+    return userUpdate;
+  }
+
+  async remove(id: number): Promise<any> {
+    const user = await this.userRepository.findOne<User>({ where: { id } });
+    if (!user) throw new HttpException('User not found', 404);
+    await this.userRepository.destroy({ where: { id: user.id } });
+    return {
+      success: true,
+    };
   }
 }
