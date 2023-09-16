@@ -1,7 +1,13 @@
 /* eslint-disable prettier/prettier */
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Sequelize } from 'sequelize-typescript';
 import { User } from 'src/modules/users/entities/user.entity';
+
+ConfigModule.forRoot({
+  envFilePath: '.develop.env',
+});
+
+const configService = new ConfigService();
 
 export const databaseProviders = [
   {
@@ -9,11 +15,11 @@ export const databaseProviders = [
     useFactory: async () => {
       const sequelize = new Sequelize({
         dialect: 'postgres',
-        host: 'localhost',
-        port: parseInt(process.env.DATABASE_PORT) || 5432,
-        username: 'postgres',
-        password: 'secret123',
-        database: 'blogdb',
+        host: configService.get<string>('DATABASE_HOST'),
+        port: parseInt(configService.get<string>('DATABASE_PORT')) || 5432,
+        username: configService.get<string>('DATABASE_USER'),
+        password: configService.get<string>('DATABASE_PASSWORD'),
+        database: configService.get<string>('DATABASE_NAME'),
       });
       sequelize.addModels([User]);
       await sequelize.sync();
