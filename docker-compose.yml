@@ -8,7 +8,7 @@ services:
     environment:
       - POSTGRES_DB=blogdb
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=secret123
+      - POSTGRES_PASSWORD=123root
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
