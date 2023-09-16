@@ -8,30 +8,23 @@ import { ArchivesModule } from './modules/archives/archives.module';
 import { SharedModule } from './modules/shared/shared.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { User } from './modules/users/entities/user.entity';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { TestModule } from './modules/test/test.module';
+import { DatabaseModule } from './config/databaseModule';
 
 @Global()
 @Module({
   imports: [
-    SequelizeModule.forRoot({
-      dialect: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'test',
-      models: [User],
-    }),
+    //SequelizeModule.forRoot({ ...databaseProviders }),
     ArticlesModule,
     UsersModule,
     AuthModule,
     ArchivesModule,
     SharedModule,
     StorageModule,
+    DatabaseModule,
     ConfigModule.forRoot({
       envFilePath: '.develop.env',
       //envFilePath: `.${process.env.NODE_ENV}.env`,
