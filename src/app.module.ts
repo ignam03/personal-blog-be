@@ -33,8 +33,8 @@ import { TestModule } from './modules/test/test.module';
     SharedModule,
     StorageModule,
     ConfigModule.forRoot({
-      envFilePath: '.develop.env',
-      //envFilePath: `.${process.env.NODE_ENV}.env`,
+      // envFilePath: '.env',
+      envFilePath: `.${process.env.NODE_ENV}.env`,
       isGlobal: true,
       //load: [configuration],
     }),
