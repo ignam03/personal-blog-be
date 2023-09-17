@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Sequelize } from 'sequelize-typescript';
+import { Article } from 'src/modules/articles/entities/article.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 
 ConfigModule.forRoot({
@@ -22,6 +23,7 @@ export const databaseProviders = [
         database: configService.get<string>('DATABASE_NAME'),
       });
       sequelize.addModels([User]);
+      sequelize.addModels([Article]);
       await sequelize.sync();
       return sequelize;
     },
