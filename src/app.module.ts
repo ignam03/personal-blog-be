@@ -13,6 +13,7 @@ import configuration from './config/configuration';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { TestModule } from './modules/test/test.module';
 import { DatabaseModule } from './config/databaseModule';
+import { ProvidersModule } from './providers/providers.module';
 
 @Global()
 @Module({
@@ -32,6 +33,7 @@ import { DatabaseModule } from './config/databaseModule';
       //load: [configuration],
     }),
     TestModule,
+    ProvidersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
