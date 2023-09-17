@@ -10,16 +10,23 @@ export class BaseEntity<T> extends Model<T> {
   id: number;
 
   @Column({
-    field: 'created_at',
+    field: 'createdAt',
     type: DataType.DATE,
     defaultValue: DataType.NOW,
   })
   createdAt: Date;
 
   @Column({
-    field: 'updated_at',
+    field: 'updatedAt',
     type: DataType.DATE,
     defaultValue: DataType.NOW,
   })
   updatedAt: Date;
+
+  @Column({
+    field: 'deletedAt',
+    type: DataType.DATE,
+    defaultValue: null,
+  })
+  deletedAt: Date;
 }

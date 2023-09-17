@@ -3,20 +3,13 @@ import {
   Column,
   DataType,
   ForeignKey,
-  Model,
   Table,
 } from 'sequelize-typescript';
+import { BaseEntity } from 'src/config/base.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 
 @Table({ tableName: 'ARTICLES' })
-export class Article extends Model<Article> {
-  @Column({
-    type: DataType.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  })
-  id: number;
-
+export class Article extends BaseEntity<Article> {
   @Column({
     type: DataType.STRING,
     allowNull: false,
