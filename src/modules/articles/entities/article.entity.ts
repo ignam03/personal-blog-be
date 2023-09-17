@@ -1,7 +1,14 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  Model,
+  Table,
+} from 'sequelize-typescript';
 import { User } from 'src/modules/users/entities/user.entity';
 
-@Table
+@Table({ tableName: 'ARTICLES' })
 export class Article extends Model<Article> {
   @Column({
     type: DataType.INTEGER,
@@ -22,9 +29,12 @@ export class Article extends Model<Article> {
   })
   description: string;
 
-  // @Column({
-  //     type: DataType.STRING,
-  //     allowNull: false
-  // })
-  // user: User;
+  @ForeignKey(() => User)
+  @Column({
+    field: 'user_id',
+  })
+  userId: number;
+
+  @BelongsTo(() => User)
+  user: User;
 }
