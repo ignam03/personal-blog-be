@@ -22,7 +22,7 @@ export const databaseProviders = [
         database: configService.get<string>('DATABASE_NAME'),
       });
       sequelize.addModels([User, Article]);
-      await sequelize.sync();
+      await sequelize.sync({ alter: true });
       return sequelize;
     },
   },
