@@ -3,6 +3,7 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { Article } from './entities/article.entity';
 import { User } from '../users/entities/user.entity';
+import { ErrorManager } from 'src/exceptions/error.manager';
 
 @Injectable()
 export class ArticlesService {
@@ -19,58 +20,112 @@ export class ArticlesService {
         ...createArticleDto,
         userId,
       });
+      if (!articleCreated) {
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: 'Article can not be created',
+        });
+      }
       return articleCreated;
     } catch (error) {
-      throw new Error(`Failed to create article: ${error.message}`);
+      throw ErrorManager.createSignatureError(error.message);
     }
   }
 
-  async fetchAll(): Promise<Article[]> {
-    return await this.articleRepository.findAll<Article>({
-      include: [
+  async fetchArticles(): Promise<Article[]> {
+    try {
+      const articles: Article[] = await this.articleRepository.findAll<Article>(
         {
-          model: User,
-          as: 'user',
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: {
+                exclude: [
+                  'password',
+                  'createdAt',
+                  'updatedAt',
+                  'biography',
+                  'lastName',
+                  'role',
+                  'gender',
+                  'birthDate',
+                ],
+              },
+            },
+          ],
           attributes: {
-            exclude: [
-              'password',
-              'createdAt',
-              'updatedAt',
-              'biography',
-              'lastName',
-              'role',
-              'gender',
-              'birthDate',
-            ],
+            exclude: ['createdAt', 'updatedAt', 'userId'],
           },
         },
-      ],
-    });
+      );
+      if (articles.length === 0)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'Articles not found',
+        });
+      return articles;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
   }
 
   async fetchById(id: number): Promise<Article> {
-    const article = this.articleRepository.findOne<Article>({
-      where: { id },
-      include: [
+    try {
+      const article = this.articleRepository.findOne<Article>({
+        where: { id },
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: {
+              exclude: [
+                'password',
+                'createdAt',
+                'updatedAt',
+                'biography',
+                'lastName',
+                'role',
+                'gender',
+                'birthDate',
+              ],
+            },
+          },
+        ],
+        attributes: {
+          exclude: ['createdAt', 'updatedAt', 'userId'],
+        },
+      });
+      if (!article)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'Article not found',
+        });
+      return article;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  async fetchByUserId(userId: number): Promise<Article[]> {
+    try {
+      const articles: Article[] = await this.articleRepository.findAll<Article>(
         {
-          model: User,
-          as: 'user',
+          where: { userId },
           attributes: {
-            exclude: [
-              'password',
-              'createdAt',
-              'updatedAt',
-              'biography',
-              'lastName',
-              'role',
-              'gender',
-            ],
+            exclude: ['createdAt', 'updatedAt', 'userId'],
           },
         },
-      ],
-    });
-    if (!article) throw new HttpException('Article not found', 404);
-    return article;
+      );
+      if (articles.length === 0)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'Articles not found',
+        });
+      return articles;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
   }
 
   async update(
@@ -78,28 +133,50 @@ export class ArticlesService {
     updateArticleDto: UpdateArticleDto,
     userId: number,
   ): Promise<any> {
-    const article = this.articleRepository.findOne<Article>({ where: { id } });
-    if (!article) throw new HttpException('Article not found', 404);
-    // const articleUpd = {
-    //   ...article,
-    //   ...updateArticleDto,
-    // };
-    const [numberOfAffectedRows, [updatedPost]] =
-      await this.articleRepository.update(
-        { ...updateArticleDto },
-        { where: { id, userId }, returning: true },
-      );
-    return { numberOfAffectedRows, updatedPost };
+    try {
+      const article = this.articleRepository.findOne<Article>({
+        where: { id },
+      });
+      if (!article)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'Article not found update error',
+        });
+      // const articleUpd = {
+      //   ...article,
+      //   ...updateArticleDto,
+      // };
+      const [numberOfAffectedRows, [updatedPost]] =
+        await this.articleRepository.update(
+          { ...updateArticleDto },
+          { where: { id, userId }, returning: true },
+        );
+      return { numberOfAffectedRows, updatedPost };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
   }
 
   async remove(id: number, userId: number): Promise<any> {
-    const article = await this.articleRepository.findOne<Article>({
-      where: { id, userId },
-    });
-    if (!article) throw new HttpException('Article not found', 404);
-    await this.articleRepository.destroy({ where: { id: article.id } });
-    return {
-      success: true,
-    };
+    try {
+      const article = await this.articleRepository.findOne<Article>({
+        where: { id, userId },
+      });
+      if (!article) throw new HttpException('Article not found', 404);
+      const deleteArticle = await this.articleRepository.destroy({
+        where: { id: article.id },
+      });
+      if (!deleteArticle) {
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'Article not found update error',
+        });
+      }
+      return {
+        success: true,
+      };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
   }
 }
