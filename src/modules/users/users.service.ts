@@ -26,7 +26,19 @@ export class UsersService {
   }
 
   async fetchByEmail(email: string): Promise<User> {
-    const user = await this.userRepository.findOne<User>({ where: { email } });
+    const user = await this.userRepository.findOne<User>({
+      where: { email },
+      attributes: {
+        exclude: [
+          'firstName',
+          'lastName',
+          'birthDate',
+          'gender',
+          'createdAt',
+          'updatedAt',
+        ],
+      },
+    });
     if (!user) throw new HttpException('User not found', 404);
     return user;
   }
