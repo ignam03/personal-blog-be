@@ -1,52 +1,26 @@
-import { Injectable, Inject, HttpException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
-import { Article } from './entities/article.entity';
 
 @Injectable()
 export class ArticlesService {
-  constructor(
-    @Inject('ARTICLE_REPOSITORY')
-    private articleRepository: typeof Article,
-  ) {}
-  async create(createArticleDto: CreateArticleDto): Promise<Article> {
-    try {
-      const articleCreated =
-        await this.articleRepository.create(createArticleDto);
-      return articleCreated;
-    } catch (error) {
-      throw new Error(`Failed to create article: ${error.message}`);
-    }
+  create(createArticleDto: CreateArticleDto) {
+    return 'This action adds a new article';
   }
 
-  async fetchAll(): Promise<Article[]> {
-    return await this.articleRepository.findAll();
+  findAll() {
+    return `This action returns all articles`;
   }
 
-  fetchById(id: number): Promise<Article> {
-    const article = this.articleRepository.findOne<Article>({ where: { id } });
-    if (!article) throw new HttpException('Article not found', 404);
-    return article;
+  findOne(id: number) {
+    return `This action returns a #${id} article`;
   }
 
-  update(id: number, updateArticleDto: UpdateArticleDto): Promise<any> {
-    const article = this.articleRepository.findOne<Article>({ where: { id } });
-    if (!article) throw new HttpException('Article not found', 404);
-    const articleUpd = {
-      ...article,
-      ...updateArticleDto,
-    };
-    return articleUpd;
+  update(id: number, updateArticleDto: UpdateArticleDto) {
+    return `This action updates a #${id} article`;
   }
 
-  async remove(id: number): Promise<any> {
-    const article = await this.articleRepository.findOne<Article>({
-      where: { id },
-    });
-    if (!article) throw new HttpException('Article not found', 404);
-    await this.articleRepository.destroy({ where: { id: article.id } });
-    return {
-      success: true,
-    };
+  remove(id: number) {
+    return `This action removes a #${id} article`;
   }
 }
