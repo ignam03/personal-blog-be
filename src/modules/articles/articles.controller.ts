@@ -31,8 +31,8 @@ export class ArticlesController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/')
-  async fetchAll(@Request() request): Promise<Article[]> {
-    return this.articlesService.fetchAll();
+  async fetchArticles(@Request() request): Promise<Article[]> {
+    return this.articlesService.fetchArticles();
   }
 
   @Get(':id')
@@ -62,5 +62,11 @@ export class ArticlesController {
       throw new HttpException('Article not found', 404);
     }
     return 'Article deleted';
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/user/:id')
+  async fetchByUserId(@Param('id') id: number): Promise<Article[]> {
+    return this.articlesService.fetchByUserId(id);
   }
 }
