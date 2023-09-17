@@ -31,7 +31,9 @@ export class Article extends Model<Article> {
 
   @ForeignKey(() => User)
   @Column({
-    field: 'user_id',
+    type: DataType.INTEGER,
+    field: 'userId',
+    allowNull: false,
   })
   userId: number;
 
