@@ -4,12 +4,14 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 import { Article } from './entities/article.entity';
 import { User } from '../users/entities/user.entity';
 import { ErrorManager } from 'src/exceptions/error.manager';
+import { HttpCustomService } from 'src/providers/http/http.service';
 
 @Injectable()
 export class ArticlesService {
   constructor(
     @Inject('ARTICLE_REPOSITORY')
     private articleRepository: typeof Article,
+    private readonly httpService: HttpCustomService,
   ) {}
   async create(
     createArticleDto: CreateArticleDto,
@@ -178,5 +180,10 @@ export class ArticlesService {
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
+  }
+
+  // http integrations
+  async apiFetchAll(): Promise<any> {
+    return await this.httpService.apiFetchAll();
   }
 }

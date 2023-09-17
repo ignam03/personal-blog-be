@@ -15,14 +15,10 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { Article } from './entities/article.entity';
 import { AuthGuard } from '@nestjs/passport';
-import { HttpCustomService } from 'src/providers/http/http.service';
 
 @Controller('articles')
 export class ArticlesController {
-  constructor(
-    private readonly articlesService: ArticlesService,
-    private readonly httpService: HttpCustomService,
-  ) {}
+  constructor(private readonly articlesService: ArticlesService) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/')
@@ -76,6 +72,6 @@ export class ArticlesController {
 
   @Get('api/all')
   async fetchAll(): Promise<Article[]> {
-    return this.httpService.apiFetchAll();
+    return this.articlesService.apiFetchAll();
   }
 }
