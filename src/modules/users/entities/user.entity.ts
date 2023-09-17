@@ -1,15 +1,9 @@
-import { Column, Model, Table, DataType, HasMany } from 'sequelize-typescript';
+import { Column, Table, DataType, HasMany } from 'sequelize-typescript';
+import { BaseEntity } from 'src/config/base.entity';
 import { Article } from 'src/modules/articles/entities/article.entity';
 
 @Table({ tableName: 'USERS' })
-export class User extends Model<User> {
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
-  })
-  id: number;
-
+export class User extends BaseEntity<User> {
   @Column({
     type: DataType.STRING,
     allowNull: false,
@@ -54,6 +48,12 @@ export class User extends Model<User> {
   })
   gender: string;
 
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  biography: string;
+
   @HasMany(() => Article)
   article: Article[];
 
@@ -63,11 +63,4 @@ export class User extends Model<User> {
     allowNull: false,
   })
   isActive: boolean;
-
-  @Column({
-    type: DataType.STRING,
-    defaultValue: false,
-    allowNull: false,
-  })
-  biography: string;
 }
