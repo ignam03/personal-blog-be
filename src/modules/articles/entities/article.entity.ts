@@ -1,1 +1,35 @@
-export class Article {}
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  Table,
+} from 'sequelize-typescript';
+import { BaseEntity } from 'src/config/base.entity';
+import { User } from 'src/modules/users/entities/user.entity';
+
+@Table({ tableName: 'ARTICLES' })
+export class Article extends BaseEntity<Article> {
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  title: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  description: string;
+
+  @ForeignKey(() => User)
+  @Column({
+    type: DataType.INTEGER,
+    field: 'userId',
+    allowNull: false,
+  })
+  userId: number;
+
+  @BelongsTo(() => User)
+  user: User;
+}

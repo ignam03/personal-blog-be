@@ -1,26 +1,64 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { UsersService } from '../users/users.service';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+  ) {}
+
+  async validateUser(username: string, pass: string): Promise<any> {
+    const user = await this.usersService.fetchByEmail(username);
+    if (!user) {
+      return null;
+    }
+
+    //find password is same
+    const match = await this.comparePassword(pass, user.password);
+    if (!match) {
+      return null;
+    }
+    const { password, ...result } = user['dataValues'];
+    return result;
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  public async login(user) {
+    const token = await this.generateToken(user);
+    return { user, token };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  public async create(user) {
+    //hash password
+    const pass = await this.hashPassword(user.password);
+
+    const newUser = await this.usersService.create({
+      ...user,
+      password: pass,
+    });
+
+    const { password, ...result } = newUser['dataValues'];
+
+    //generate Token
+    const token = await this.generateToken(result);
+
+    return { user: result, token };
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
+  private async generateToken(user) {
+    const token = await this.jwtService.signAsync(user);
+    return token;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  private async hashPassword(password: string) {
+    const hash = bcrypt.hashSync(password, 10);
+    return hash;
+  }
+
+  private async comparePassword(enteredPassword, dbPassword) {
+    const match = await bcrypt.compare(enteredPassword, dbPassword);
+    return match;
   }
 }
