@@ -1,10 +1,8 @@
-import { Column, Model, Table, DataType } from 'sequelize-typescript';
+import { Column, Model, Table, DataType, HasMany } from 'sequelize-typescript';
 import { Article } from 'src/modules/articles/entities/article.entity';
 
-@Table
+@Table({ tableName: 'USERS' })
 export class User extends Model<User> {
-
-  
   @Column({
     type: DataType.INTEGER,
     autoIncrement: true,
@@ -50,8 +48,8 @@ export class User extends Model<User> {
   })
   gender: string;
 
-  //@Column
-  //articles: Article[];
+  @HasMany(() => Article)
+  article: Article[];
 
   @Column({ defaultValue: false })
   isActive: boolean;

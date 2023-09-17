@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Sequelize } from 'sequelize-typescript';
 import { Article } from 'src/modules/articles/entities/article.entity';
@@ -22,8 +21,7 @@ export const databaseProviders = [
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
       });
-      sequelize.addModels([User]);
-      sequelize.addModels([Article]);
+      sequelize.addModels([User, Article]);
       await sequelize.sync();
       return sequelize;
     },
