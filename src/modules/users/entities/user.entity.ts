@@ -57,6 +57,17 @@ export class User extends Model<User> {
   @HasMany(() => Article)
   article: Article[];
 
-  @Column({ defaultValue: false })
+  @Column({
+    type: DataType.BOOLEAN,
+    defaultValue: false,
+    allowNull: false,
+  })
   isActive: boolean;
+
+  @Column({
+    type: DataType.STRING,
+    defaultValue: false,
+    allowNull: false,
+  })
+  biography: string;
 }

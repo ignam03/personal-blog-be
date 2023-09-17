@@ -28,7 +28,22 @@ export class ArticlesService {
   async fetchAll(): Promise<Article[]> {
     return await this.articleRepository.findAll<Article>({
       include: [
-        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        {
+          model: User,
+          as: 'user',
+          attributes: {
+            exclude: [
+              'password',
+              'createdAt',
+              'updatedAt',
+              'biography',
+              'lastName',
+              'role',
+              'gender',
+              'birthDate',
+            ],
+          },
+        },
       ],
     });
   }
@@ -37,7 +52,21 @@ export class ArticlesService {
     const article = this.articleRepository.findOne<Article>({
       where: { id },
       include: [
-        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        {
+          model: User,
+          as: 'user',
+          attributes: {
+            exclude: [
+              'password',
+              'createdAt',
+              'updatedAt',
+              'biography',
+              'lastName',
+              'role',
+              'gender',
+            ],
+          },
+        },
       ],
     });
     if (!article) throw new HttpException('Article not found', 404);
