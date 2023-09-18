@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { ErrorManager } from 'src/exceptions/error.manager';
 
 @Injectable()
 export class AuthService {
@@ -32,19 +33,29 @@ export class AuthService {
 
   public async create(user) {
     //hash password
-    const pass = await this.hashPassword(user.password);
+    try {
+      const userByEmail = await this.usersService.fetchByEmail(user.email);
+      if (userByEmail)
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: 'User already exists',
+        });
+      const pass = await this.hashPassword(user.password);
 
-    const newUser = await this.usersService.create({
-      ...user,
-      password: pass,
-    });
+      const newUser = await this.usersService.create({
+        ...user,
+        password: pass,
+      });
 
-    const { password, ...result } = newUser['dataValues'];
+      const { password, ...result } = newUser['dataValues'];
 
-    //generate Token
-    const token = await this.generateToken(result);
+      //generate Token
+      const token = await this.generateToken(result);
 
-    return { user: result, token };
+      return { user: result, token };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
   }
 
   private async generateToken(user) {

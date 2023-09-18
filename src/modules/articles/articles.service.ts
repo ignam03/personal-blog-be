@@ -45,6 +45,7 @@ export class ArticlesService {
                   'password',
                   'createdAt',
                   'updatedAt',
+                  'deletedAt',
                   'biography',
                   'lastName',
                   'role',
@@ -83,6 +84,7 @@ export class ArticlesService {
                 'password',
                 'createdAt',
                 'updatedAt',
+                'deletedAt',
                 'biography',
                 'lastName',
                 'role',
@@ -113,7 +115,7 @@ export class ArticlesService {
         {
           where: { userId },
           attributes: {
-            exclude: ['createdAt', 'updatedAt', 'userId'],
+            exclude: ['createdAt', 'updatedAt', 'userId', 'deletedAt'],
           },
         },
       );
