@@ -66,7 +66,7 @@ export class ArticlesController {
     if (deleted === 0) {
       throw new HttpException('Article not found', 404);
     }
-    return 'Article deleted';
+    return { success: true, message: 'Article deleted' };
   }
 
   @ApiParam({
