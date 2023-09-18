@@ -1,4 +1,4 @@
-version: '3.1'
+version: "3.8"
 
 services:
   personal_blog_pg:
@@ -6,10 +6,10 @@ services:
     container_name: personal_blog_pg
     restart: always
     environment:
-      - POSTGRES_DB=blogdb
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123root
+      - POSTGRES_DB=blogdb
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - 5432:5432
+      - "5436:5432"
