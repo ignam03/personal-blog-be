@@ -2,6 +2,7 @@ import { Injectable, Inject, HttpException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { ErrorManager } from 'src/exceptions/error.manager';
 
 @Injectable()
 export class UsersService {
@@ -33,13 +34,19 @@ export class UsersService {
           'firstName',
           'lastName',
           'birthDate',
+          'biography',
           'gender',
           'createdAt',
           'updatedAt',
+          'deletedAt',
         ],
       },
     });
-    if (!user) throw new HttpException('User not found', 404);
+    if (false && !user)
+      throw new ErrorManager({
+        type: 'NOT_FOUND',
+        message: 'User not found',
+      });
     return user;
   }
 
