@@ -1,4 +1,4 @@
-import { Injectable, Inject, HttpException } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -12,18 +12,47 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const createUser = await this.userRepository.create(createUserDto);
-    return createUser;
+    try {
+      const createUser = await this.userRepository.create(createUserDto);
+      if (!createUser) {
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: 'User can not be created',
+        });
+      }
+      return createUser;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
   }
 
   async fetchAll(): Promise<User[]> {
-    return await this.userRepository.findAll();
+    try {
+      const users = await this.userRepository.findAll();
+      if (users.length === 0) {
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'Users not found',
+        });
+      }
+      return users;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
   }
 
   async fetchById(id: number): Promise<User> {
-    const user = await this.userRepository.findOne<User>({ where: { id } });
-    if (!user) throw new HttpException('User not found', 404);
-    return user;
+    try {
+      const user = await this.userRepository.findOne<User>({ where: { id } });
+      if (!user)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'User not found',
+        });
+      return user;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
   }
 
   async fetchByEmail(email: string): Promise<User> {
@@ -51,21 +80,45 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<any> {
-    const user = await this.userRepository.findOne<User>({ where: { id } });
-    if (!user) throw new HttpException('User not found', 404);
-    const userUpdate = {
-      ...user,
-      ...updateUserDto,
-    };
-    return userUpdate;
+    try {
+      const user = await this.userRepository.findOne<User>({
+        where: { id },
+      });
+      if (!user)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'User not found',
+        });
+      const [numberOfAffectedRows, [updatedUser]] =
+        await this.userRepository.update(
+          { ...updateUserDto },
+          { where: { id }, returning: true },
+        );
+      if (!updatedUser)
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: 'User can not be updated',
+        });
+      return { numberOfAffectedRows, updatedUser };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
   }
 
   async remove(id: number): Promise<any> {
-    const user = await this.userRepository.findOne<User>({ where: { id } });
-    if (!user) throw new HttpException('User not found', 404);
-    await this.userRepository.destroy({ where: { id: user.id } });
-    return {
-      success: true,
-    };
+    try {
+      const user = await this.userRepository.findOne<User>({ where: { id } });
+      if (!user)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'User not found',
+        });
+      await this.userRepository.destroy({ where: { id: user.id } });
+      return {
+        success: true,
+      };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
   }
 }
