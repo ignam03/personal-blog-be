@@ -3,9 +3,11 @@ import {
   Column,
   DataType,
   ForeignKey,
+  HasMany,
   Table,
 } from 'sequelize-typescript';
 import { BaseEntity } from 'src/config/base.entity';
+import { Comment } from 'src/modules/comments/entities/comment.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 
 @Table({ tableName: 'ARTICLES' })
@@ -32,4 +34,7 @@ export class Article extends BaseEntity<Article> {
 
   @BelongsTo(() => User)
   user: User;
+
+  @HasMany(() => Comment)
+  comments: Comment[];
 }

@@ -4,6 +4,7 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 import { Article } from './entities/article.entity';
 import { User } from '../users/entities/user.entity';
 import { ErrorManager } from 'src/exceptions/error.manager';
+import { Comment } from '../comments/entities/comment.entity';
 
 @Injectable()
 export class ArticlesService {
@@ -54,6 +55,13 @@ export class ArticlesService {
                 ],
               },
             },
+            {
+              model: Comment,
+              as: 'comments',
+              attributes: {
+                exclude: ['createdAt', 'updatedAt', 'userId', 'deletedAt'],
+              },
+            },
           ],
           attributes: {
             exclude: ['createdAt', 'updatedAt', 'userId'],
@@ -91,6 +99,13 @@ export class ArticlesService {
                 'gender',
                 'birthDate',
               ],
+            },
+          },
+          {
+            model: Comment,
+            as: 'comments',
+            attributes: {
+              exclude: ['createdAt', 'updatedAt', 'userId', 'deletedAt'],
             },
           },
         ],
