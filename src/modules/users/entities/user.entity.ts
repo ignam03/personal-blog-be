@@ -1,6 +1,7 @@
 import { Column, Table, DataType, HasMany } from 'sequelize-typescript';
 import { BaseEntity } from 'src/config/base.entity';
 import { Article } from 'src/modules/articles/entities/article.entity';
+import { Comment } from 'src/modules/comments/entities/comment.entity';
 
 @Table({ tableName: 'USERS' })
 export class User extends BaseEntity<User> {
@@ -63,4 +64,7 @@ export class User extends BaseEntity<User> {
     allowNull: false,
   })
   isActive: boolean;
+
+  @HasMany(() => Comment)
+  comment: Comment[];
 }
