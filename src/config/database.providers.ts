@@ -1,6 +1,7 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Sequelize } from 'sequelize-typescript';
 import { Article } from 'src/modules/articles/entities/article.entity';
+import { Comment } from 'src/modules/comments/entities/comment.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 
 ConfigModule.forRoot({
@@ -26,7 +27,7 @@ export const databaseProviders = [
           native: true,
         },
       });
-      sequelize.addModels([User, Article]);
+      sequelize.addModels([User, Article, Comment]);
       await sequelize.sync({ alter: true });
       return sequelize;
     },

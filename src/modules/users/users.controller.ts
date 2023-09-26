@@ -7,12 +7,14 @@ import {
   Param,
   Delete,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
+import { ErrorManager } from 'src/exceptions/error.manager';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('users')
@@ -20,27 +22,44 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('/')
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    return await this.usersService.create(createUserDto);
   }
 
   @Get('/')
-  fetchAll(): Promise<User[]> {
-    return this.usersService.fetchAll();
+  async fetchAll(@Request() request): Promise<User[]> {
+    return await this.usersService.fetchAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.fetchById(+id);
+  @Get(':userId')
+  async findOne(@Param('userId') userId: number): Promise<User> {
+    const user = await this.usersService.fetchById(userId);
+    if (!user) {
+      throw new ErrorManager({
+        type: 'NOT_FOUND',
+        message: 'User not found',
+      });
+    }
+    return user;
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @Patch(':userId')
+  async update(
+    @Param('userId') userId: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    return await this.usersService.update(userId, updateUserDto);
   }
 
-  @Delete(':id')
-  deleteUser(@Param('id') id: string): Promise<any> {
-    return this.usersService.remove(+id);
+  @Delete(':userId')
+  async deleteUser(@Param('userId') userId: number): Promise<any> {
+    const deleted = await this.usersService.remove(userId);
+    if (deleted === 0) {
+      throw new ErrorManager({
+        type: 'NOT_FOUND',
+        message: 'User not found',
+      });
+    }
+    return { success: true, message: 'User deleted' };
   }
 }
