@@ -14,6 +14,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import { TestModule } from './modules/test/test.module';
 import { DatabaseModule } from './config/databaseModule';
 import { CommentsModule } from './modules/comments/comments.module';
+import { RouterModule } from '@nestjs/core';
 
 @Global()
 @Module({
@@ -34,6 +35,18 @@ import { CommentsModule } from './modules/comments/comments.module';
     }),
     TestModule,
     CommentsModule,
+    // RouterModule.register([
+    //   {
+    //     path: 'comments',
+    //     module: CommentsModule,
+    //     children: [
+    //       {
+    //         path: 'article/:articleId',
+    //         module: TestModule,
+    //       },
+    //     ],
+    //   },
+    // ]),
   ],
   controllers: [AppController],
   providers: [AppService],

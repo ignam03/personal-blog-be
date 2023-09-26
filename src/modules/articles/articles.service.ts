@@ -33,7 +33,47 @@ export class ArticlesService {
     }
   }
 
-  async fetchArticles(): Promise<Article[]> {
+  async fetchArticles(limit?: number): Promise<Article[]> {
+    try {
+      const articles: Article[] = await this.articleRepository.findAll<Article>(
+        {
+          limit: limit,
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: {
+                exclude: [
+                  'password',
+                  'createdAt',
+                  'updatedAt',
+                  'deletedAt',
+                  'biography',
+                  'lastName',
+                  'role',
+                  'gender',
+                  'birthDate',
+                ],
+              },
+            },
+          ],
+          attributes: {
+            exclude: ['createdAt', 'updatedAt', 'userId'],
+          },
+        },
+      );
+      if (articles.length === 0)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'Articles not found',
+        });
+      return articles;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  async fetchArticlesWithComments(limit?: number): Promise<Article[]> {
     try {
       const articles: Article[] = await this.articleRepository.findAll<Article>(
         {
@@ -66,6 +106,7 @@ export class ArticlesService {
           attributes: {
             exclude: ['createdAt', 'updatedAt', 'userId'],
           },
+          limit: limit,
         },
       );
       if (articles.length === 0)
@@ -113,6 +154,7 @@ export class ArticlesService {
           exclude: ['createdAt', 'updatedAt', 'userId'],
         },
       });
+      console.log(article);
       if (!article)
         throw new ErrorManager({
           type: 'NOT_FOUND',
@@ -124,7 +166,10 @@ export class ArticlesService {
     }
   }
 
-  async fetchByUserId(userId: number): Promise<Article[]> {
+  async fetchArticlesByUserId(
+    userId: number,
+    limit?: number,
+  ): Promise<Article[]> {
     try {
       const articles: Article[] = await this.articleRepository.findAll<Article>(
         {
@@ -132,6 +177,7 @@ export class ArticlesService {
           attributes: {
             exclude: ['createdAt', 'updatedAt', 'userId', 'deletedAt'],
           },
+          limit: limit,
         },
       );
       if (articles.length === 0)
@@ -192,6 +238,22 @@ export class ArticlesService {
       return {
         success: true,
       };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  async findOne(articleId: number): Promise<Article> {
+    try {
+      const article = await this.articleRepository.findOne<Article>({
+        where: { id: articleId },
+      });
+      if (!article)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'Article not found',
+        });
+      return article;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }

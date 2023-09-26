@@ -6,5 +6,6 @@ import { articleProviders } from './entities/article.providers';
 @Module({
   controllers: [ArticlesController],
   providers: [ArticlesService, ...articleProviders],
+  exports: [ArticlesService],
 })
 export class ArticlesModule {}

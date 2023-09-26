@@ -9,6 +9,7 @@ import {
   UseGuards,
   HttpException,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -31,13 +32,19 @@ export class ArticlesController {
   }
 
   @Get('/')
-  async fetchArticles(@Request() request): Promise<Article[]> {
-    return this.articlesService.fetchArticles();
+  @ApiParam({
+    name: 'limit',
+  })
+  async fetchArticles(
+    @Request() request,
+    @Query('limit') limit: number,
+  ): Promise<Article[]> {
+    return await this.articlesService.fetchArticles(limit);
   }
 
   @Get(':articleId')
   async findOne(@Param('articleId') articleId: number): Promise<Article> {
-    const article = this.articlesService.fetchById(articleId);
+    const article = await this.articlesService.fetchById(articleId);
     if (!article) {
       throw new HttpException('Article not found', 404);
     }
@@ -73,7 +80,10 @@ export class ArticlesController {
     name: 'userId',
   })
   @Get('/user/:userId')
-  async fetchByUserId(@Param('userId') userId: number): Promise<Article[]> {
-    return this.articlesService.fetchByUserId(userId);
+  async fetchByUserId(
+    @Param('userId') userId: number,
+    @Query('limit') limit: number,
+  ): Promise<Article[]> {
+    return this.articlesService.fetchArticlesByUserId(userId, limit);
   }
 }
