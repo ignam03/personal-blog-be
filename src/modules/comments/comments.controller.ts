@@ -21,13 +21,13 @@ import { Comment } from './entities/comment.entity';
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  @Post()
+  @Post('/')
   async create(@Body() createCommentDto: CreateCommentDto, @Request() request) {
     console.log(request.user.id);
     return await this.commentsService.create(createCommentDto, request.user.id);
   }
 
-  @Get()
+  @Get('/')
   async findAll() {
     return await this.commentsService.fetchAllComment();
   }
@@ -66,10 +66,35 @@ export class CommentsController {
     return { success: true, message: 'Comment deleted' };
   }
 
-  // @Get('/article/:articleId')
-  // async fetchCommentsByArticleId(
-  //   @Param('articleId') articleId: number,
-  // ): Promise<Article> {
-  //   return await this.commentsService.fetchAllCommentByArticle(articleId);
+  @Get('/article/:articleId')
+  async fetchCommentsByArticleId(
+    @Param('articleId') articleId: number,
+  ): Promise<any> {
+    const articleWithComments =
+      await this.commentsService.fetchAllCommentByArticle(articleId);
+    return articleWithComments;
+  }
+
+  @Get('/sub-comment/:commentId')
+  async fetchSubCommentByCommentId(
+    @Param('commentId') commentId: number,
+  ): Promise<any> {
+    const comment =
+      await this.commentsService.fetchSubCommentByCommentId(commentId);
+    if (!comment) {
+      throw new HttpException('Comment not found', 404);
+    }
+    return comment;
+  }
+
+  // @Post('/sub-comment')
+  // async createSubComment(
+  //   @Body() createCommentDto: CreateCommentDto,
+  //   @Request() request,
+  // ) {
+  //   return await this.commentsService.createSubComment(
+  //     createCommentDto,
+  //     request.user.id,
+  //   );
   // }
 }

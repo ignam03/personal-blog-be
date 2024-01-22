@@ -258,4 +258,49 @@ export class ArticlesService {
       throw ErrorManager.createSignatureError(error.message);
     }
   }
+
+  async fetchArticleWithComments(articleId: number): Promise<Article> {
+    try {
+      const article = await this.articleRepository.findOne<Article>({
+        where: { id: articleId },
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: {
+              exclude: [
+                'password',
+                'createdAt',
+                'updatedAt',
+                'deletedAt',
+                'biography',
+                'lastName',
+                'role',
+                'gender',
+                'birthDate',
+              ],
+            },
+          },
+          {
+            model: Comment,
+            as: 'comments',
+            attributes: {
+              exclude: ['createdAt', 'updatedAt', 'userId', 'deletedAt'],
+            },
+          },
+        ],
+        attributes: {
+          exclude: ['createdAt', 'updatedAt', 'userId'],
+        },
+      });
+      if (!article)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'Article not found',
+        });
+      return article;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
 }

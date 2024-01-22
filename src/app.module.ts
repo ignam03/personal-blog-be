@@ -15,6 +15,7 @@ import { TestModule } from './modules/test/test.module';
 import { DatabaseModule } from './config/databaseModule';
 import { CommentsModule } from './modules/comments/comments.module';
 import { RouterModule } from '@nestjs/core';
+import { SubCommentsModule } from './modules/sub-comments/sub-comments.module';
 
 @Global()
 @Module({
@@ -35,13 +36,14 @@ import { RouterModule } from '@nestjs/core';
     }),
     TestModule,
     CommentsModule,
+    SubCommentsModule,
     // RouterModule.register([
     //   {
     //     path: 'comments',
-    //     module: CommentsModule,
+    //     module: SubCommentsModule,
     //     children: [
     //       {
-    //         path: 'article/:articleId',
+    //         path: 'sub-comments/',
     //         module: TestModule,
     //       },
     //     ],

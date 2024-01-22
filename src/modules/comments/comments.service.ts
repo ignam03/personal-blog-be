@@ -6,6 +6,7 @@ import { Comment } from './entities/comment.entity';
 import { User } from '../users/entities/user.entity';
 import { Article } from '../articles/entities/article.entity';
 import { ArticlesService } from '../articles/articles.service';
+import { SubCommentsService } from '../sub-comments/sub-comments.service';
 
 @Injectable()
 export class CommentsService {
@@ -13,6 +14,7 @@ export class CommentsService {
     @Inject('COMMENT_REPOSITORY')
     private commentRepository: typeof Comment,
     private readonly articleService: ArticlesService,
+    private readonly subCommentService: SubCommentsService,
   ) {}
   async create(
     createCommentDto: CreateCommentDto,
@@ -80,7 +82,8 @@ export class CommentsService {
 
   async fetchAllCommentByArticle(articleId: number): Promise<Article> {
     try {
-      const article = await this.articleService.findOne(articleId);
+      const article =
+        await this.articleService.fetchArticleWithComments(articleId);
       // .include({
       //   model: Comment,
       //   as: 'comments',
@@ -193,6 +196,21 @@ export class CommentsService {
       return {
         success: true,
       };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  async fetchSubCommentByCommentId(commentId: number): Promise<any> {
+    try {
+      const subComments =
+        await this.subCommentService.fetchSubCommentsByCommentId(commentId);
+      if (subComments.length === 0)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'SubComments not found',
+        });
+      return subComments;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
