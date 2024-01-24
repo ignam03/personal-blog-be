@@ -3,7 +3,7 @@ import { BaseEntity } from 'src/config/base.entity';
 import { Article } from 'src/modules/articles/entities/article.entity';
 import { Comment } from 'src/modules/comments/entities/comment.entity';
 
-@Table({ tableName: 'USERS' })
+@Table({ tableName: 'Users' })
 export class User extends BaseEntity<User> {
   @Column({
     type: DataType.STRING,
