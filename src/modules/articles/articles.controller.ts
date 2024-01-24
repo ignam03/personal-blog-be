@@ -77,13 +77,13 @@ export class ArticlesController {
   }
 
   @ApiParam({
-    name: 'userId',
+    name: 'authorId',
   })
-  @Get('/user/:userId')
-  async fetchByUserId(
-    @Param('userId') userId: number,
+  @Get('/user/:authorId')
+  async fetchByAuthorId(
+    @Param('authorId') authorId: number,
     @Query('limit') limit: number,
   ): Promise<Article[]> {
-    return this.articlesService.fetchArticlesByUserId(userId, limit);
+    return this.articlesService.fetchArticlesByAuthorId(authorId, limit);
   }
 }
