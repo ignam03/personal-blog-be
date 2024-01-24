@@ -17,11 +17,22 @@ export class CommentsService {
   async create(
     createCommentDto: CreateCommentDto,
     authorId: number,
+    parentCommentId?: number,
   ): Promise<Comment> {
     try {
+      const article = await this.articleService.findOne(
+        createCommentDto.articleId,
+      );
+      if (!article) {
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: 'Article not found',
+        });
+      }
       const commentCreated = await this.commentRepository.create<Comment>({
         ...createCommentDto,
         authorId,
+        parentCommentId,
       });
       if (!commentCreated) {
         throw new ErrorManager({
@@ -35,14 +46,15 @@ export class CommentsService {
     }
   }
 
-  async fetchAllComment(): Promise<Comment[]> {
+  async fetchAllComment(limit?: number): Promise<Comment[]> {
     try {
       const comments: Comment[] = await this.commentRepository.findAll<Comment>(
         {
+          limit: limit,
           include: [
             {
               model: User,
-              as: 'user',
+              as: 'author',
               attributes: {
                 exclude: [
                   'password',
@@ -78,22 +90,18 @@ export class CommentsService {
     }
   }
 
-  async fetchAllCommentByArticle(articleId: number): Promise<Article> {
+  async fetchAllCommentByArticle(articleId: number): Promise<Comment[]> {
     try {
       const article = await this.articleService.findOne(articleId);
-      // .include({
-      //   model: Comment,
-      //   as: 'comments',
-      //   attributes: {
-      //     exclude: ['createdAt', 'updatedAt', 'userId', 'deletedAt'],
-      //   },
-      // });
       if (!article)
         throw new ErrorManager({
           type: 'NOT_FOUND',
-          message: 'Comments not found',
+          message: 'article not found',
         });
-      return article;
+      const comments = await this.commentRepository.findAll({
+        where: { articleId },
+      });
+      return comments;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
@@ -107,7 +115,7 @@ export class CommentsService {
           include: [
             {
               model: User,
-              as: 'user',
+              as: 'author',
               attributes: {
                 exclude: [
                   'password',
@@ -193,6 +201,55 @@ export class CommentsService {
       return {
         success: true,
       };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  async fetchSubComments(
+    parentCommentId: number,
+    limit?: number,
+  ): Promise<Comment[]> {
+    try {
+      const comments = await this.commentRepository.findAll({
+        where: { parentCommentId },
+        order: [['id', 'ASC']],
+        limit: limit,
+        include: [
+          {
+            model: User,
+            as: 'author',
+            attributes: {
+              exclude: [
+                'password',
+                'createdAt',
+                'updatedAt',
+                'deletedAt',
+                'biography',
+                'lastName',
+                'role',
+                'gender',
+                'birthDate',
+              ],
+            },
+          },
+        ],
+        attributes: {
+          exclude: [
+            'createdAt',
+            'updatedAt',
+            'userId',
+            'deletedAt',
+            'deletedAt',
+          ],
+        },
+      });
+      if (!comments)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'Comments not found',
+        });
+      return comments;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }

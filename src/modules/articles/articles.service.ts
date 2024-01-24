@@ -14,12 +14,12 @@ export class ArticlesService {
   ) {}
   async create(
     createArticleDto: CreateArticleDto,
-    userId: number,
+    authorId: number,
   ): Promise<Article> {
     try {
       const articleCreated = await this.articleRepository.create<Article>({
         ...createArticleDto,
-        userId,
+        authorId,
       });
       if (!articleCreated) {
         throw new ErrorManager({
@@ -58,7 +58,7 @@ export class ArticlesService {
             },
           ],
           attributes: {
-            exclude: ['createdAt', 'updatedAt', 'userId'],
+            exclude: ['createdAt', 'updatedAt', 'authorId'],
           },
         },
       );
@@ -99,12 +99,12 @@ export class ArticlesService {
               model: Comment,
               as: 'comments',
               attributes: {
-                exclude: ['createdAt', 'updatedAt', 'userId', 'deletedAt'],
+                exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
               },
             },
           ],
           attributes: {
-            exclude: ['createdAt', 'updatedAt', 'userId'],
+            exclude: ['createdAt', 'updatedAt', 'authorId'],
           },
           limit: limit,
         },
@@ -146,12 +146,12 @@ export class ArticlesService {
             model: Comment,
             as: 'comments',
             attributes: {
-              exclude: ['createdAt', 'updatedAt', 'userId', 'deletedAt'],
+              exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
             },
           },
         ],
         attributes: {
-          exclude: ['createdAt', 'updatedAt', 'userId'],
+          exclude: ['createdAt', 'updatedAt', 'authorId'],
         },
       });
       console.log(article);
@@ -166,16 +166,16 @@ export class ArticlesService {
     }
   }
 
-  async fetchArticlesByUserId(
-    userId: number,
+  async fetchArticlesByAuthorId(
+    authorId: number,
     limit?: number,
   ): Promise<Article[]> {
     try {
       const articles: Article[] = await this.articleRepository.findAll<Article>(
         {
-          where: { userId },
+          where: { authorId },
           attributes: {
-            exclude: ['createdAt', 'updatedAt', 'userId', 'deletedAt'],
+            exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
           },
           limit: limit,
         },
@@ -194,7 +194,7 @@ export class ArticlesService {
   async update(
     id: number,
     updateArticleDto: UpdateArticleDto,
-    userId: number,
+    authorId: number,
   ): Promise<any> {
     try {
       const article = this.articleRepository.findOne<Article>({
@@ -212,7 +212,7 @@ export class ArticlesService {
       const [numberOfAffectedRows, [updatedPost]] =
         await this.articleRepository.update(
           { ...updateArticleDto },
-          { where: { id, userId }, returning: true },
+          { where: { id, authorId }, returning: true },
         );
       return { numberOfAffectedRows, updatedPost };
     } catch (error) {
@@ -220,10 +220,10 @@ export class ArticlesService {
     }
   }
 
-  async remove(id: number, userId: number): Promise<any> {
+  async remove(id: number, authorId: number): Promise<any> {
     try {
       const article = await this.articleRepository.findOne<Article>({
-        where: { id, userId },
+        where: { id, authorId },
       });
       if (!article) throw new HttpException('Article not found', 404);
       const deleteArticle = await this.articleRepository.destroy({

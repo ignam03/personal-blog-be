@@ -9,12 +9,14 @@ import {
   Request,
   UseGuards,
   HttpException,
+  Query,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Comment } from './entities/comment.entity';
+import { ApiParam } from '@nestjs/swagger';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('comments')
@@ -22,14 +24,33 @@ export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Post()
-  async create(@Body() createCommentDto: CreateCommentDto, @Request() request) {
-    console.log(request.user.id);
-    return await this.commentsService.create(createCommentDto, request.user.id);
+  @ApiParam({
+    name: 'parentCommentId',
+    type: Number,
+    required: false,
+  })
+  async create(
+    @Body() createCommentDto: CreateCommentDto,
+    @Request() request,
+    @Query('parentCommentId') parentCommentId: number,
+  ) {
+    return await this.commentsService.create(
+      createCommentDto,
+      request.user.id,
+      parentCommentId,
+    );
   }
 
   @Get()
-  async findAll() {
-    return await this.commentsService.fetchAllComment();
+  @ApiParam({
+    name: 'limit',
+    required: false,
+  })
+  async fetchComments(
+    @Request() request,
+    @Query('limit') limit: number,
+  ): Promise<Comment[]> {
+    return await this.commentsService.fetchAllComment(limit);
   }
 
   @Get(':commentId')
@@ -66,10 +87,21 @@ export class CommentsController {
     return { success: true, message: 'Comment deleted' };
   }
 
-  // @Get('/article/:articleId')
-  // async fetchCommentsByArticleId(
-  //   @Param('articleId') articleId: number,
-  // ): Promise<Article> {
-  //   return await this.commentsService.fetchAllCommentByArticle(articleId);
-  // }
+  @Get('/article/:articleId')
+  async fetchCommentsByArticleId(
+    @Param('articleId') articleId: number,
+  ): Promise<Comment[]> {
+    return await this.commentsService.fetchAllCommentByArticle(articleId);
+  }
+
+  @Get('/sub/:parentCommentId')
+  @ApiParam({
+    name: 'limit',
+  })
+  async fetchSubComments(
+    @Param('parentCommentId') parentCommentId: number,
+    @Query('limit') limit?: number,
+  ): Promise<Comment[]> {
+    return await this.commentsService.fetchSubComments(parentCommentId, limit);
+  }
 }

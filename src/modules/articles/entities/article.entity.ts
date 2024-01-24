@@ -10,7 +10,7 @@ import { BaseEntity } from 'src/config/base.entity';
 import { Comment } from 'src/modules/comments/entities/comment.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 
-@Table({ tableName: 'ARTICLES' })
+@Table({ tableName: 'Articles' })
 export class Article extends BaseEntity<Article> {
   @Column({
     type: DataType.STRING,
@@ -27,10 +27,10 @@ export class Article extends BaseEntity<Article> {
   @ForeignKey(() => User)
   @Column({
     type: DataType.INTEGER,
-    field: 'userId',
+    field: 'authorId',
     allowNull: false,
   })
-  userId: number;
+  authorId: number;
 
   @BelongsTo(() => User)
   user: User;
