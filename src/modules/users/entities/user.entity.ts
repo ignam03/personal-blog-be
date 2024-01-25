@@ -25,6 +25,12 @@ export class User extends BaseEntity<User> {
 
   @Column({
     type: DataType.STRING,
+    allowNull: true,
+  })
+  userName: string;
+
+  @Column({
+    type: DataType.STRING,
     allowNull: false,
   })
   email: string;
