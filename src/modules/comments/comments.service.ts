@@ -50,6 +50,9 @@ export class CommentsService {
     try {
       const comments: Comment[] = await this.commentRepository.findAll<Comment>(
         {
+          attributes: {
+            exclude: ['createdAt', 'updatedAt', 'deletedAt', 'parentCommentId'],
+          },
           limit: limit,
           include: [
             {
@@ -66,14 +69,8 @@ export class CommentsService {
                   'role',
                   'gender',
                   'birthDate',
+                  'email',
                 ],
-              },
-            },
-            {
-              model: Article,
-              as: 'article',
-              attributes: {
-                exclude: ['createdAt', 'updatedAt', 'deletedAt'],
               },
             },
           ],
@@ -100,6 +97,9 @@ export class CommentsService {
         });
       const comments = await this.commentRepository.findAll({
         where: { articleId },
+        attributes: {
+          exclude: ['createdAt', 'updatedAt', 'deletedAt', 'parentCommentId'],
+        },
       });
       return comments;
     } catch (error) {
@@ -226,10 +226,12 @@ export class CommentsService {
                 'updatedAt',
                 'deletedAt',
                 'biography',
+                'firstName',
                 'lastName',
                 'role',
                 'gender',
                 'birthDate',
+                'email',
               ],
             },
           },
@@ -241,6 +243,7 @@ export class CommentsService {
             'userId',
             'deletedAt',
             'deletedAt',
+            'parentCommentId',
           ],
         },
       });
