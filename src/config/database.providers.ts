@@ -26,6 +26,7 @@ export const databaseProviders = [
           ssl: true,
           native: true,
         },
+        logging: false,
       });
       sequelize.addModels([User, Article, Comment]);
       await sequelize.sync({ alter: true });

@@ -9,10 +9,13 @@ export class LoggerMiddleware implements NestMiddleware {
     const now = Date.now();
     console.log('Request...');
     res.on('close', () => {
-        const { statusCode } = res;
-        console.log(`HTTP Request ${method} ${url} ${statusCode} | ${Date.now()-now}ms`, {
-        ignore: true,
-        });
+      const { statusCode } = res;
+      console.log(
+        `HTTP Request ${method} ${url} ${statusCode} | ${Date.now() - now}ms`,
+        {
+          ignore: true,
+        },
+      );
     });
     next();
   }
