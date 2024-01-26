@@ -21,6 +21,11 @@ export const databaseProviders = [
         username: configService.get<string>('DATABASE_USER'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
+        ssl: configService.get<string>('DB_DIALECT') === 'true',
+        dialectOptions: {
+          ssl: true,
+          native: true,
+        },
         logging: false,
       });
       sequelize.addModels([User, Article, Comment]);
