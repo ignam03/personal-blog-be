@@ -17,13 +17,15 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 import { Article } from './entities/article.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiParam } from '@nestjs/swagger';
+import { Public } from 'src/decorators/public.decorator';
 
-@UseGuards(AuthGuard('jwt'))
+//@UseGuards(AuthGuard('jwt'))
 @Controller('articles')
 export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
   @Post('/')
+  @UseGuards(AuthGuard('jwt'))
   async create(
     @Body() createArticleDto: CreateArticleDto,
     @Request() request,
@@ -31,6 +33,7 @@ export class ArticlesController {
     return this.articlesService.create(createArticleDto, request.user.id);
   }
 
+  @Public()
   @Get('/')
   @ApiParam({
     name: 'limit',
@@ -42,7 +45,14 @@ export class ArticlesController {
     return await this.articlesService.fetchArticles(limit);
   }
 
+  @Get('/my-articles')
+  @UseGuards(AuthGuard('jwt'))
+  async fetchMyArticles(@Request() request): Promise<Article[]> {
+    return await this.articlesService.fetchMyArticles(request.user.id);
+  }
+
   @Get(':articleId')
+  @UseGuards(AuthGuard('jwt'))
   async findOne(@Param('articleId') articleId: number): Promise<Article> {
     const article = await this.articlesService.fetchById(articleId);
     if (!article) {
@@ -52,6 +62,7 @@ export class ArticlesController {
   }
 
   @Put(':articleId')
+  @UseGuards(AuthGuard('jwt'))
   async update(
     @Param('articleId') articleId: number,
     @Body() updateArticleDto: UpdateArticleDto,
@@ -65,6 +76,7 @@ export class ArticlesController {
   }
 
   @Delete(':articleId')
+  @UseGuards(AuthGuard('jwt'))
   async remove(@Param('articleId') articleId: number, @Request() request) {
     const deleted = await this.articlesService.remove(
       articleId,
@@ -76,10 +88,11 @@ export class ArticlesController {
     return { success: true, message: 'Article deleted' };
   }
 
+  @Get('/user/:authorId')
   @ApiParam({
     name: 'authorId',
   })
-  @Get('/user/:authorId')
+  @UseGuards(AuthGuard('jwt'))
   async fetchByAuthorId(
     @Param('authorId') authorId: number,
     @Query('limit') limit: number,

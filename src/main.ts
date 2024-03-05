@@ -1,9 +1,10 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { CORS } from './constants';
 import { ValidationPipe } from '@nestjs/common';
+import { AuthGuard } from './modules/auth/strategies/auth.gaurd';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -37,6 +38,9 @@ async function bootstrap() {
   app.enableCors(CORS);
 
   app.setGlobalPrefix('api');
+
+  const reflector = app.get(Reflector);
+  app.useGlobalGuards(new AuthGuard(reflector));
 
   await app.listen(port);
   console.log(`Application is running on http://localhost:${port}`);

@@ -229,7 +229,11 @@ export class ArticlesService {
       const article = await this.articleRepository.findOne<Article>({
         where: { id, authorId },
       });
-      if (!article) throw new HttpException('Article not found', 404);
+      if (!article)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'you can not delete article',
+        });
       const deleteArticle = await this.articleRepository.destroy({
         where: { id: article.id },
       });
@@ -258,6 +262,48 @@ export class ArticlesService {
           message: 'Article not found',
         });
       return article;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  async fetchMyArticles(authorId: number): Promise<Article[]> {
+    try {
+      const articles: Article[] = await this.articleRepository.findAll<Article>(
+        {
+          where: { authorId },
+          attributes: {
+            exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
+          },
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: {
+                exclude: [
+                  'password',
+                  'createdAt',
+                  'updatedAt',
+                  'deletedAt',
+                  'biography',
+                  'firstName',
+                  'lastName',
+                  'role',
+                  'gender',
+                  'birthDate',
+                  'email',
+                ],
+              },
+            },
+          ],
+        },
+      );
+      if (articles.length === 0)
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'Articles not found',
+        });
+      return articles;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }

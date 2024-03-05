@@ -24,6 +24,12 @@ export class Article extends BaseEntity<Article> {
   })
   description: string;
 
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  articleImage: string;
+
   @ForeignKey(() => User)
   @Column({
     type: DataType.INTEGER,
