@@ -90,8 +90,12 @@ export class CommentsController {
   @Get('/article/:articleId')
   async fetchCommentsByArticleId(
     @Param('articleId') articleId: number,
+    @Query('limit') limit: number,
   ): Promise<Comment[]> {
-    return await this.commentsService.fetchAllCommentByArticle(articleId);
+    return await this.commentsService.fetchAllCommentByArticle(
+      articleId,
+      limit,
+    );
   }
 
   @Get('/sub/:parentCommentId')
