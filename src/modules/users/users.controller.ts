@@ -26,6 +26,11 @@ export class UsersController {
     return await this.usersService.create(createUserDto);
   }
 
+  @Get('my-profile')
+  async fetchMyProfile(@Request() request): Promise<User> {
+    return await this.usersService.fetchMyProfile(request.user.id);
+  }
+
   @Get('/')
   async fetchAll(@Request() request): Promise<User[]> {
     return await this.usersService.fetchAll();

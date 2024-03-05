@@ -27,6 +27,12 @@ export class User extends BaseEntity<User> {
     type: DataType.STRING,
     allowNull: true,
   })
+  profileImage: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
   userName: string;
 
   @Column({

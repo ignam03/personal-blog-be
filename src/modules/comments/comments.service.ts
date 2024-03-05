@@ -87,7 +87,10 @@ export class CommentsService {
     }
   }
 
-  async fetchAllCommentByArticle(articleId: number): Promise<Comment[]> {
+  async fetchAllCommentByArticle(
+    articleId: number,
+    limit: number,
+  ): Promise<Comment[]> {
     try {
       const article = await this.articleService.findOne(articleId);
       if (!article)
@@ -100,6 +103,27 @@ export class CommentsService {
         attributes: {
           exclude: ['createdAt', 'updatedAt', 'deletedAt', 'parentCommentId'],
         },
+        limit: limit,
+        include: [
+          {
+            model: User,
+            as: 'author',
+            attributes: {
+              exclude: [
+                'password',
+                'createdAt',
+                'updatedAt',
+                'deletedAt',
+                'biography',
+                'lastName',
+                'role',
+                'gender',
+                'birthDate',
+                'email',
+              ],
+            },
+          },
+        ],
       });
       return comments;
     } catch (error) {
@@ -187,8 +211,8 @@ export class CommentsService {
       });
       if (!comment)
         throw new ErrorManager({
-          type: 'NOT_FOUND',
-          message: 'Comment not found update error',
+          type: 'BAD_REQUEST',
+          message: 'Can not delete comment',
         });
       const deleteComment = await this.commentRepository.destroy({
         where: { id: comment.id },

@@ -121,4 +121,19 @@ export class UsersService {
       throw ErrorManager.createSignatureError(error.message);
     }
   }
+
+  async fetchMyProfile(id: number): Promise<User> {
+    try {
+      const user = await this.userRepository.findOne<User>({
+        where: { id: id },
+        attributes: {
+          exclude: ['password', 'createdAt', 'updatedAt', 'deletedAt'],
+        },
+      });
+      return user;
+    } catch (error) {
+      console.log(error);
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
 }
