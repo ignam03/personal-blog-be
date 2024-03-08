@@ -29,8 +29,8 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
     StorageModule,
     DatabaseModule,
     ConfigModule.forRoot({
-      envFilePath: '.develop.env',
-      //envFilePath: `.${process.env.NODE_ENV}.env`,
+      // envFilePath: '.env',
+      envFilePath: `.${process.env.NODE_ENV}.env`,
       isGlobal: true,
       //load: [configuration],
     }),
