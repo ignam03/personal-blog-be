@@ -3,12 +3,14 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { ErrorManager } from 'src/exceptions/error.manager';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @Inject('USER_REPOSITORY')
     private userRepository: typeof User,
+    private cloudinary: CloudinaryService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -79,8 +81,16 @@ export class UsersService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<any> {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+    file: Express.Multer.File,
+  ): Promise<any> {
     try {
+      if (file) {
+        const res = await this.cloudinary.uploadImage(file);
+        updateUserDto.profileImage = res.url;
+      }
       const user = await this.userRepository.findOne<User>({
         where: { id },
       });

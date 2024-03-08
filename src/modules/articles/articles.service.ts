@@ -1,10 +1,11 @@
-import { Injectable, Inject, HttpException } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { Article } from './entities/article.entity';
 import { User } from '../users/entities/user.entity';
 import { ErrorManager } from 'src/exceptions/error.manager';
 import { Comment } from '../comments/entities/comment.entity';
+import { col, fn } from 'sequelize';
 
 @Injectable()
 export class ArticlesService {
@@ -62,6 +63,7 @@ export class ArticlesService {
           attributes: {
             exclude: ['createdAt', 'updatedAt', 'authorId'],
           },
+          order: [['id', 'DESC']],
         },
       );
       if (articles.length === 0)
@@ -274,6 +276,7 @@ export class ArticlesService {
           where: { authorId },
           attributes: {
             exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
+            include: [[fn('COUNT', col('comments.id')), 'commentsCount']],
           },
           include: [
             {
@@ -295,7 +298,15 @@ export class ArticlesService {
                 ],
               },
             },
+            {
+              model: Comment,
+              as: 'comments',
+              attributes: {
+                exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
+              },
+            },
           ],
+          group: ['Article.id', 'user.id', 'comments.id'],
         },
       );
       if (articles.length === 0)

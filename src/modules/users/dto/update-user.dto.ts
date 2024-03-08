@@ -9,4 +9,6 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 
   @Exclude()
   lastName: string;
+
+  profileImage: string;
 }

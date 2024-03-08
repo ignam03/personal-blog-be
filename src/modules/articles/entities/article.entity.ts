@@ -19,7 +19,7 @@ export class Article extends BaseEntity<Article> {
   title: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.TEXT('long'),
     allowNull: false,
   })
   description: string;

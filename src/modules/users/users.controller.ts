@@ -8,6 +8,11 @@ import {
   Delete,
   UseGuards,
   Request,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -15,6 +20,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { ErrorManager } from 'src/exceptions/error.manager';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('users')
@@ -49,11 +55,22 @@ export class UsersController {
   }
 
   @Patch(':userId')
+  @UseInterceptors(FileInterceptor('file'))
   async update(
     @Param('userId') userId: number,
+    @Request() request,
     @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }),
+          new FileTypeValidator({ fileType: '.(jpg|jpeg|png)$' }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
   ): Promise<User> {
-    return await this.usersService.update(userId, updateUserDto);
+    return await this.usersService.update(request.user.id, updateUserDto, file);
   }
 
   @Delete(':userId')
