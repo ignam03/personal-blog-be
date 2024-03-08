@@ -1,34 +1,51 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseInterceptors,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
+  UploadedFile,
+  Get,
+  Body,
+} from '@nestjs/common';
 import { ArchivesService } from './archives.service';
-import { CreateArchiveDto } from './dto/create-archive.dto';
-import { UpdateArchiveDto } from './dto/update-archive.dto';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { RegisterDto } from '../auth/dto/register-user.dto';
+import { UpdateUserDto } from '../users/dto/update-user.dto';
 
 @Controller('archives')
 export class ArchivesController {
-  constructor(private readonly archivesService: ArchivesService) {}
+  constructor(
+    private readonly archivesService: ArchivesService,
+    private cloudinary: CloudinaryService,
+  ) {}
 
-  @Post()
-  create(@Body() createArchiveDto: CreateArchiveDto) {
-    return this.archivesService.create(createArchiveDto);
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadImage(
+    @Body() body: UpdateUserDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }),
+          new FileTypeValidator({ fileType: '.(jpg|jpeg|png)$' }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    console.log(file);
+    console.log(body);
+    const res = this.cloudinary.uploadImage(file);
+    console.log(res);
+    //return this.cloudinary.uploadImage(file);
   }
 
-  @Get()
+  @Get('list')
   findAll() {
     return this.archivesService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.archivesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateArchiveDto: UpdateArchiveDto) {
-    return this.archivesService.update(+id, updateArchiveDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.archivesService.remove(+id);
   }
 }
