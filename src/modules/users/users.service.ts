@@ -4,6 +4,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { ErrorManager } from 'src/exceptions/error.manager';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { compareHash, generateHash } from 'src/utils/utils';
 
 @Injectable()
 export class UsersService {
@@ -84,7 +86,7 @@ export class UsersService {
   async update(
     id: number,
     updateUserDto: UpdateUserDto,
-    file: Express.Multer.File,
+    file?: Express.Multer.File,
   ): Promise<any> {
     try {
       if (file) {
@@ -143,6 +145,61 @@ export class UsersService {
       return user;
     } catch (error) {
       console.log(error);
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  async updatePassword(
+    id: number,
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<any> {
+    try {
+      const user = await this.userRepository.findOne<User>({
+        where: { id },
+      });
+      if (!user) {
+        return null;
+      }
+      const match = await compareHash(oldPassword, user.password);
+      if (!match) {
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: 'Old password does not match',
+        });
+      }
+      const newPasswordHashed = await generateHash(newPassword);
+      const [numberOfAffectedRows, [updatedUser]] =
+        await this.userRepository.update(
+          {
+            password: newPasswordHashed,
+          },
+          { where: { id }, returning: true },
+        );
+      if (!updatedUser)
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: 'User can not be updated',
+        });
+      return { numberOfAffectedRows, updatedUser };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  async forgotPassword(forgotPassword: ForgotPasswordDto) {
+    try {
+      const { email } = forgotPassword;
+      const user = await this.userRepository.findOne<User>({
+        where: { email },
+      });
+      if (!user) {
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'User not found',
+        });
+      }
+    } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
   }

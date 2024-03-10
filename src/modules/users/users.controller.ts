@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
   UseGuards,
@@ -21,6 +21,10 @@ import { User } from './entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { ErrorManager } from 'src/exceptions/error.manager';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Patch } from '@nestjs/common';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { Public } from 'src/decorators/public.decorator';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('users')
@@ -83,5 +87,22 @@ export class UsersController {
       });
     }
     return { success: true, message: 'User deleted' };
+  }
+
+  @Post('forgot-password')
+  @Public()
+  async forgotPassword(@Body() body: ForgotPasswordDto) {
+    return await this.usersService.forgotPassword(body);
+  }
+
+  @Put('change-password')
+  async changePassword(@Request() request, @Body() body: ChangePasswordDto) {
+    const userId = request.user.id;
+    const { newPassword, oldPassword } = body;
+    return await this.usersService.updatePassword(
+      userId,
+      oldPassword,
+      newPassword,
+    );
   }
 }
