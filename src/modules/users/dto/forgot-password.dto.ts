@@ -1,12 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
-export class CreateArticleDto {
+export class ForgotPasswordDto {
   @IsNotEmpty()
   @ApiProperty()
-  readonly title: string;
-
-  @IsNotEmpty()
-  @ApiProperty()
-  readonly description: string;
+  email: string;
 }

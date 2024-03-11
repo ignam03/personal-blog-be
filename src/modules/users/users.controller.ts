@@ -3,16 +3,16 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
-  UseGuards,
   Request,
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  Put,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,6 +21,11 @@ import { User } from './entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { ErrorManager } from 'src/exceptions/error.manager';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Patch } from '@nestjs/common';
+import { Public } from 'src/decorators/public.decorator';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('users')
@@ -83,5 +88,32 @@ export class UsersController {
       });
     }
     return { success: true, message: 'User deleted' };
+  }
+
+  @Post('forgot-password')
+  @Public()
+  async forgotPassword(@Body() body: ForgotPasswordDto) {
+    return await this.usersService.forgotPassword(body);
+  }
+
+  @Post('reset-password/:token')
+  @Public()
+  async newPassword(
+    @Param('token') token: string,
+    @Body() body: ResetPasswordDto,
+  ) {
+    return await this.usersService.newPassword(token, body);
+    return true;
+  }
+
+  @Put('change-password')
+  async changePassword(@Request() request, @Body() body: ChangePasswordDto) {
+    const userId = request.user.id;
+    const { newPassword, oldPassword } = body;
+    return await this.usersService.updatePassword(
+      userId,
+      oldPassword,
+      newPassword,
+    );
   }
 }
