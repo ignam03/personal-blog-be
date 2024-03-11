@@ -4,12 +4,15 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ErrorManager } from 'src/exceptions/error.manager';
 import { ROLES } from 'src/constants/roles';
+import { generateId } from 'src/utils/utils';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
@@ -28,8 +31,18 @@ export class AuthService {
   }
 
   public async login(user) {
-    const token = await this.generateToken(user);
-    return { user, token };
+    try {
+      const token = await this.generateToken(user);
+      if (user.isActive == false) {
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: 'Account not activated',
+        });
+      }
+      return { user, token };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
   }
 
   public async create(user) {
@@ -42,10 +55,12 @@ export class AuthService {
           message: 'User already exists',
         });
       const pass = await this.hashPassword(user.password);
-
+      const myToken = generateId();
       const newUser = await this.usersService.create({
         ...user,
+        token: myToken,
         role: ROLES.USER,
+        isActive: false,
         password: pass,
       });
 
@@ -53,6 +68,19 @@ export class AuthService {
 
       //generate Token
       const token = await this.generateToken(result);
+      //send welcome email
+      // emailRegister({
+      //   email: user.email,
+      //   token: myToken,
+      //   name: user.firstName,
+      // });
+
+      //send welcome email
+      await this.mailService.sendUserConfirmation(
+        user.email,
+        user.firstName,
+        myToken,
+      );
 
       return { user: result, token };
     } catch (error) {
@@ -73,5 +101,16 @@ export class AuthService {
   private async comparePassword(enteredPassword, dbPassword) {
     const match = await bcrypt.compare(enteredPassword, dbPassword);
     return match;
+  }
+
+  public async confirmAccount(token: string) {
+    try {
+      const user = await this.usersService.fetchByToken(token);
+      user.token = '';
+      user.isActive = true;
+      user.save();
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
   }
 }

@@ -4,9 +4,8 @@ import { IsNotEmpty } from 'class-validator';
 export class ChangePasswordDto {
   @IsNotEmpty()
   @ApiProperty()
-  readonly oldPassword: string;
-
+  oldPassword: string;
   @IsNotEmpty()
   @ApiProperty()
-  readonly newPassword: string;
+  newPassword: string;
 }

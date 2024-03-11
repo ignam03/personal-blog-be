@@ -47,8 +47,11 @@ export class ArticlesController {
 
   @Get('/my-articles')
   @UseGuards(AuthGuard('jwt'))
-  async fetchMyArticles(@Request() request): Promise<Article[]> {
-    return await this.articlesService.fetchMyArticles(request.user.id);
+  async fetchMyArticles(
+    @Request() request,
+    @Query('limit') limit: number,
+  ): Promise<Article[]> {
+    return await this.articlesService.fetchMyArticles(request.user.id, limit);
   }
 
   @Get(':articleId')

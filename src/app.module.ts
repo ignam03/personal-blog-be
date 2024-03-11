@@ -16,6 +16,7 @@ import { DatabaseModule } from './config/databaseModule';
 import { CommentsModule } from './modules/comments/comments.module';
 import { RouterModule } from '@nestjs/core';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { MailModule } from './modules/mail/mail.module';
 
 @Global()
 @Module({
@@ -37,6 +38,7 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
     TestModule,
     CommentsModule,
     CloudinaryModule,
+    MailModule,
     // RouterModule.register([
     //   {
     //     path: 'comments',

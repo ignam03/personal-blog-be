@@ -269,7 +269,7 @@ export class ArticlesService {
     }
   }
 
-  async fetchMyArticles(authorId: number): Promise<Article[]> {
+  async fetchMyArticles(authorId: number, limit?: number): Promise<Article[]> {
     try {
       const articles: Article[] = await this.articleRepository.findAll<Article>(
         {
