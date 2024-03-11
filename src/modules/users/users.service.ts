@@ -205,11 +205,17 @@ export class UsersService {
       user.token = generateId();
       user.save();
       //send email to reset password
-      this.mailService.sendPasswordReset(
+      const res = await this.mailService.sendPasswordReset(
         user.email,
         user.firstName,
         user.token,
       );
+      if (!res) {
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: 'Error sending email',
+        });
+      }
       return {
         success: true,
       };
