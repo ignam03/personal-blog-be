@@ -126,7 +126,7 @@ export class ArticlesService {
 
   async fetchById(id: number): Promise<Article> {
     try {
-      const article = this.articleRepository.findOne<Article>({
+      const article = await this.articleRepository.findOne<Article>({
         where: { id },
         include: [
           {
@@ -160,7 +160,6 @@ export class ArticlesService {
           exclude: ['createdAt', 'updatedAt', 'authorId'],
         },
       });
-      console.log(article);
       if (!article)
         throw new ErrorManager({
           type: 'NOT_FOUND',
