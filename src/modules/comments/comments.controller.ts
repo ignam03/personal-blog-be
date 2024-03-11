@@ -17,8 +17,9 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Comment } from './entities/comment.entity';
 import { ApiParam } from '@nestjs/swagger';
+import { Public } from 'src/decorators/public.decorator';
 
-@UseGuards(AuthGuard('jwt'))
+//@UseGuards(AuthGuard('jwt'))
 @Controller('comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
@@ -29,6 +30,7 @@ export class CommentsController {
     type: Number,
     required: false,
   })
+  @UseGuards(AuthGuard('jwt'))
   async create(
     @Body() createCommentDto: CreateCommentDto,
     @Request() request,
@@ -46,6 +48,7 @@ export class CommentsController {
     name: 'limit',
     required: false,
   })
+  @UseGuards(AuthGuard('jwt'))
   async fetchComments(
     @Request() request,
     @Query('limit') limit: number,
@@ -54,6 +57,7 @@ export class CommentsController {
   }
 
   @Get(':commentId')
+  @UseGuards(AuthGuard('jwt'))
   async findOne(@Param('commentId') commentId: number): Promise<Comment> {
     const comment = await this.commentsService.fetchByCommentId(commentId);
     if (!comment) {
@@ -63,6 +67,7 @@ export class CommentsController {
   }
 
   @Patch(':commentId')
+  @UseGuards(AuthGuard('jwt'))
   async update(
     @Param('commentId') commentId: number,
     @Body() updateCommentDto: UpdateCommentDto,
@@ -76,6 +81,7 @@ export class CommentsController {
   }
 
   @Delete(':commentId')
+  @UseGuards(AuthGuard('jwt'))
   async remove(@Param('commentId') commentId: number, @Request() request) {
     const deleted = await this.commentsService.remove(
       commentId,
@@ -88,6 +94,7 @@ export class CommentsController {
   }
 
   @Get('/article/:articleId')
+  @Public()
   async fetchCommentsByArticleId(
     @Param('articleId') articleId: number,
     @Query('limit') limit: number,
@@ -102,6 +109,7 @@ export class CommentsController {
   @ApiParam({
     name: 'limit',
   })
+  @UseGuards(AuthGuard('jwt'))
   async fetchSubComments(
     @Param('parentCommentId') parentCommentId: number,
     @Query('limit') limit?: number,
