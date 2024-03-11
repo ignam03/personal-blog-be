@@ -55,7 +55,7 @@ export class ArticlesController {
   }
 
   @Get(':articleId')
-  @UseGuards(AuthGuard('jwt'))
+  @Public()
   async findOne(@Param('articleId') articleId: number): Promise<Article> {
     const article = await this.articlesService.fetchById(articleId);
     if (!article) {
