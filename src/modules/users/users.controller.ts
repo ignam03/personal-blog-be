@@ -27,27 +27,31 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
-@UseGuards(AuthGuard('jwt'))
+//@UseGuards(AuthGuard('jwt'))
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('/')
+  @UseGuards(AuthGuard('jwt'))
   async create(@Body() createUserDto: CreateUserDto) {
     return await this.usersService.create(createUserDto);
   }
 
   @Get('my-profile')
+  @UseGuards(AuthGuard('jwt'))
   async fetchMyProfile(@Request() request): Promise<User> {
     return await this.usersService.fetchMyProfile(request.user.id);
   }
 
   @Get('/')
+  @UseGuards(AuthGuard('jwt'))
   async fetchAll(@Request() request): Promise<User[]> {
     return await this.usersService.fetchAll();
   }
 
   @Get(':userId')
+  @UseGuards(AuthGuard('jwt'))
   async findOne(@Param('userId') userId: number): Promise<User> {
     const user = await this.usersService.fetchById(userId);
     if (!user) {
@@ -60,6 +64,7 @@ export class UsersController {
   }
 
   @Patch(':userId')
+  @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(FileInterceptor('file'))
   async update(
     @Param('userId') userId: number,
@@ -79,6 +84,7 @@ export class UsersController {
   }
 
   @Delete(':userId')
+  @UseGuards(AuthGuard('jwt'))
   async deleteUser(@Param('userId') userId: number): Promise<any> {
     const deleted = await this.usersService.remove(userId);
     if (deleted === 0) {
@@ -96,8 +102,8 @@ export class UsersController {
     return await this.usersService.forgotPassword(body);
   }
 
-  @Post('reset-password/:token')
   @Public()
+  @Post('reset-password/:token')
   async newPassword(
     @Param('token') token: string,
     @Body() body: ResetPasswordDto,
@@ -107,6 +113,7 @@ export class UsersController {
   }
 
   @Put('change-password')
+  @UseGuards(AuthGuard('jwt'))
   async changePassword(@Request() request, @Body() body: ChangePasswordDto) {
     const userId = request.user.id;
     const { newPassword, oldPassword } = body;
