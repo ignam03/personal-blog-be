@@ -5,7 +5,9 @@ import { User } from './entities/user.entity';
 import { ErrorManager } from 'src/exceptions/error.manager';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { compareHash, generateHash } from 'src/utils/utils';
+import { compareHash, generateHash, generateId } from 'src/utils/utils';
+import { MailService } from '../mail/mail.service';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -13,6 +15,7 @@ export class UsersService {
     @Inject('USER_REPOSITORY')
     private userRepository: typeof User,
     private cloudinary: CloudinaryService,
+    private mailService: MailService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -199,6 +202,47 @@ export class UsersService {
           message: 'User not found',
         });
       }
+      user.token = generateId();
+      user.save();
+      //send email to reset password
+      this.mailService.sendPasswordReset(
+        user.email,
+        user.firstName,
+        user.token,
+      );
+      return {
+        success: true,
+      };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  async fetchByToken(token: string): Promise<User> {
+    try {
+      const user = await this.userRepository.findOne<User>({
+        where: { token },
+      });
+      if (!user) {
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'User not found',
+        });
+      }
+      return user;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  async newPassword(token: string, body: ResetPasswordDto) {
+    try {
+      const { password } = body;
+      const user = await this.fetchByToken(token);
+      const newPasswordHashed = await generateHash(password);
+      user.password = newPasswordHashed;
+      user.token = '';
+      user.save();
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }

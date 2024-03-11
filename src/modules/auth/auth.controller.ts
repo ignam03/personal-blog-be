@@ -5,6 +5,7 @@ import {
   Request,
   UseGuards,
   Get,
+  Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -33,5 +34,11 @@ export class AuthController {
   @Public()
   async signup(@Body() body: RegisterDto) {
     return await this.authService.create(body);
+  }
+
+  @Get('confirm-account/:token')
+  @Public()
+  async confirmAccount(@Param('token') token: string) {
+    return await this.authService.confirmAccount(token);
   }
 }
