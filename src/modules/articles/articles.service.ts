@@ -6,6 +6,7 @@ import { User } from '../users/entities/user.entity';
 import { ErrorManager } from 'src/exceptions/error.manager';
 import { Comment } from '../comments/entities/comment.entity';
 import { col, fn } from 'sequelize';
+import { getPagination, paginationData } from 'src/utils/utils';
 
 @Injectable()
 export class ArticlesService {
@@ -34,44 +35,52 @@ export class ArticlesService {
     }
   }
 
-  async fetchArticles(limit?: number): Promise<Article[]> {
+  async fetchArticles(
+    size?: number,
+    page?: number,
+  ): Promise<{
+    articles: Article[];
+    totalItems: number;
+    currentPage: number;
+    totalPages: number;
+  }> {
     try {
-      const articles: Article[] = await this.articleRepository.findAll<Article>(
-        {
-          limit: limit,
-          include: [
-            {
-              model: User,
-              as: 'user',
-              attributes: {
-                exclude: [
-                  'password',
-                  'createdAt',
-                  'updatedAt',
-                  'deletedAt',
-                  'biography',
-                  'firstName',
-                  'lastName',
-                  'role',
-                  'gender',
-                  'birthDate',
-                  'email',
-                ],
-              },
+      const { limit, offset } = getPagination(page, size);
+      const articles: {
+        rows: Article[];
+        count: number;
+      } = await this.articleRepository.findAndCountAll<Article>({
+        offset: offset,
+        limit: limit,
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: {
+              exclude: [
+                'password',
+                'createdAt',
+                'updatedAt',
+                'deletedAt',
+                'biography',
+                'firstName',
+                'lastName',
+                'role',
+                'gender',
+                'birthDate',
+                'email',
+                'token',
+              ],
             },
-          ],
-          attributes: {
-            exclude: ['createdAt', 'updatedAt', 'authorId'],
           },
-          order: [['id', 'DESC']],
+        ],
+        attributes: {
+          exclude: ['createdAt', 'updatedAt', 'authorId'],
         },
-      );
-      if (articles.length === 0)
-        throw new ErrorManager({
-          type: 'NOT_FOUND',
-          message: 'Articles not found',
-        });
-      return articles;
+        order: [['id', 'DESC']],
+      });
+      const response = paginationData(articles, page, size);
+      return response;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
@@ -272,6 +281,7 @@ export class ArticlesService {
     try {
       const articles: Article[] = await this.articleRepository.findAll<Article>(
         {
+          //limit: limit,
           where: { authorId },
           attributes: {
             exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],

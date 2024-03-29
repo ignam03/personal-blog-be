@@ -36,17 +36,38 @@ export class ArticlesController {
   @Public()
   @Get('/')
   @ApiParam({
-    name: 'limit',
+    name: 'size',
+    type: Number,
+    required: false,
+    description: 'Page size',
+  })
+  @ApiParam({
+    name: 'page',
+    type: Number,
+    required: false,
+    description: 'Page number',
   })
   async fetchArticles(
     @Request() request,
-    @Query('limit') limit: number,
-  ): Promise<Article[]> {
-    return await this.articlesService.fetchArticles(limit);
+    @Query('size') size: number,
+    @Query('page') page: number,
+  ): Promise<{
+    articles: Article[];
+    totalItems: number;
+    currentPage: number;
+    totalPages: number;
+  }> {
+    return await this.articlesService.fetchArticles(size, page);
   }
 
   @Get('/my-articles')
   @UseGuards(AuthGuard('jwt'))
+  @ApiParam({
+    name: 'limit',
+    type: Number,
+    required: false,
+    description: 'Limit articles',
+  })
   async fetchMyArticles(
     @Request() request,
     @Query('limit') limit: number,
