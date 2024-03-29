@@ -277,53 +277,63 @@ export class ArticlesService {
     }
   }
 
-  async fetchMyArticles(authorId: number, limit?: number): Promise<Article[]> {
+  async fetchMyArticles(
+    authorId: number,
+    page?: number,
+    size?: number,
+  ): Promise<{
+    articles: Article[];
+    totalItems: number;
+    currentPage: number;
+    totalPages: number;
+  }> {
     try {
-      const articles: Article[] = await this.articleRepository.findAll<Article>(
-        {
-          //limit: limit,
-          where: { authorId },
-          attributes: {
-            exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
-            include: [[fn('COUNT', col('comments.id')), 'commentsCount']],
-          },
-          include: [
-            {
-              model: User,
-              as: 'user',
-              attributes: {
-                exclude: [
-                  'password',
-                  'createdAt',
-                  'updatedAt',
-                  'deletedAt',
-                  'biography',
-                  'firstName',
-                  'lastName',
-                  'role',
-                  'gender',
-                  'birthDate',
-                  'email',
-                ],
-              },
-            },
-            {
-              model: Comment,
-              as: 'comments',
-              attributes: {
-                exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
-              },
-            },
-          ],
-          group: ['Article.id', 'user.id', 'comments.id'],
+      const { limit, offset } = getPagination(page, size);
+      const articles = await this.articleRepository.findAndCountAll<Article>({
+        offset: offset,
+        where: { authorId },
+        attributes: {
+          exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
+          include: [[fn('COUNT', col('comments.id')), 'commentsCount']],
         },
-      );
-      if (articles.length === 0)
-        throw new ErrorManager({
-          type: 'NOT_FOUND',
-          message: 'Articles not found',
-        });
-      return articles;
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: {
+              exclude: [
+                'password',
+                'createdAt',
+                'updatedAt',
+                'deletedAt',
+                'biography',
+                'firstName',
+                'lastName',
+                'role',
+                'gender',
+                'birthDate',
+                'email',
+              ],
+            },
+          },
+          {
+            model: Comment,
+            as: 'comments',
+            attributes: {
+              exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
+            },
+          },
+        ],
+        group: ['Article.id', 'user.id', 'comments.id'],
+      });
+      // console.log(articles);
+      // if (articles.length === 0)
+      //   throw new ErrorManager({
+      //     type: 'NOT_FOUND',
+      //     message: 'Articles not found',
+      //   });
+      const response = paginationData(articles, page, size);
+      return response;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
