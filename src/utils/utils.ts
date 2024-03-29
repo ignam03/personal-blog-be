@@ -25,3 +25,15 @@ export const generateId = (length = 10) => {
   }
   return result;
 };
+export const getPagination = (page: number, size: number) => {
+  const limit = size ? +size : 1;
+  const offset = page ? page * limit : 0;
+  return { limit, offset };
+};
+
+export const paginationData = (data: any, page: number, limit: number) => {
+  const { count: totalItems, rows: articles } = data;
+  const currentPage = page ? +page : 0;
+  const totalPages = Math.ceil(totalItems / limit);
+  return { articles, totalItems, currentPage, totalPages };
+};
