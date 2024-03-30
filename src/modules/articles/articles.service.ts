@@ -289,13 +289,13 @@ export class ArticlesService {
   }> {
     try {
       const { limit, offset } = getPagination(page, size);
-      const articles = await this.articleRepository.findAndCountAll<Article>({
+      const articles: {
+        rows: Article[];
+        count: number;
+      } = await this.articleRepository.findAndCountAll<Article>({
         offset: offset,
+        limit: limit,
         where: { authorId },
-        attributes: {
-          exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
-          include: [[fn('COUNT', col('comments.id')), 'commentsCount']],
-        },
         include: [
           {
             model: User,
@@ -320,22 +320,98 @@ export class ArticlesService {
             model: Comment,
             as: 'comments',
             attributes: {
-              exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
+              exclude: [
+                'createdAt',
+                'updatedAt',
+                'deletedAt',
+                'authorId',
+                'content',
+                'parentCommentId',
+                'articleId',
+              ],
             },
+            // include: [
+            //   {
+            //     model: User,
+            //     as: 'author',
+            //     attributes: ['id', 'userName'], // Adjust attributes as needed
+            //   },
+            // ],
           },
         ],
-        group: ['Article.id', 'user.id', 'comments.id'],
+        attributes: {
+          exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
+        },
+        order: [['id', 'DESC']],
       });
-      // console.log(articles);
-      // if (articles.length === 0)
-      //   throw new ErrorManager({
-      //     type: 'NOT_FOUND',
-      //     message: 'Articles not found',
-      //   });
+
+      // Extracting articles and pagination data
       const response = paginationData(articles, page, size);
       return response;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
   }
+
+  // async fetchMyArticles(
+  //   authorId: number,
+  //   page?: number,
+  //   size?: number,
+  // ): Promise<{
+  //   articles: Article[];
+  //   totalItems: number;
+  //   currentPage: number;
+  //   totalPages: number;
+  // }> {
+  //   try {
+  //     const { limit, offset } = getPagination(page, size);
+  //     const articles = await this.articleRepository.findAndCountAll<Article>({
+  //       offset: offset,
+  //       where: { authorId },
+  //       attributes: {
+  //         exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
+  //         include: [[fn('COUNT', col('comments.id')), 'commentsCount']],
+  //       },
+  //       include: [
+  //         {
+  //           model: User,
+  //           as: 'user',
+  //           attributes: {
+  //             exclude: [
+  //               'password',
+  //               'createdAt',
+  //               'updatedAt',
+  //               'deletedAt',
+  //               'biography',
+  //               'firstName',
+  //               'lastName',
+  //               'role',
+  //               'gender',
+  //               'birthDate',
+  //               'email',
+  //             ],
+  //           },
+  //         },
+  //         {
+  //           model: Comment,
+  //           as: 'comments',
+  //           attributes: {
+  //             exclude: ['createdAt', 'updatedAt', 'authorId', 'deletedAt'],
+  //           },
+  //         },
+  //       ],
+  //       group: ['Article.id', 'user.id', 'comments.id'],
+  //     });
+  //     // console.log(articles);
+  //     // if (articles.length === 0)
+  //     //   throw new ErrorManager({
+  //     //     type: 'NOT_FOUND',
+  //     //     message: 'Articles not found',
+  //     //   });
+  //     const response = paginationData(articles, page, size);
+  //     return response;
+  //   } catch (error) {
+  //     throw ErrorManager.createSignatureError(error.message);
+  //   }
+  // }
 }
