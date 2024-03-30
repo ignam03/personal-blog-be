@@ -31,7 +31,18 @@ export const getPagination = (page: number, size: number) => {
   return { limit, offset };
 };
 
-export const paginationData = (data: any, page: number, limit: number) => {
+export const paginationData = (
+  data: any,
+  page: number,
+  limit: number,
+  countItems?: number,
+) => {
+  if (countItems) {
+    const { count: totalItems, rows: articles } = data;
+    const currentPage = page ? +page : 0;
+    const totalPages = Math.ceil(totalItems / limit);
+    return { articles, totalItems: countItems, currentPage, totalPages };
+  }
   const { count: totalItems, rows: articles } = data;
   const currentPage = page ? +page : 0;
   const totalPages = Math.ceil(totalItems / limit);
