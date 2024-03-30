@@ -5,7 +5,7 @@ import { Article } from './entities/article.entity';
 import { User } from '../users/entities/user.entity';
 import { ErrorManager } from 'src/exceptions/error.manager';
 import { Comment } from '../comments/entities/comment.entity';
-import { col, fn } from 'sequelize';
+//import { col, fn } from 'sequelize';
 import { getPagination, paginationData } from 'src/utils/utils';
 
 @Injectable()
@@ -346,7 +346,8 @@ export class ArticlesService {
       });
 
       // Extracting articles and pagination data
-      const response = paginationData(articles, page, size);
+      const totalItems = articles.rows.length;
+      const response = paginationData(articles, page, size, totalItems);
       return response;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
