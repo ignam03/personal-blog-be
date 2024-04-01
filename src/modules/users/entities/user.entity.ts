@@ -83,6 +83,19 @@ export class User extends BaseEntity<User> {
   })
   isActive: boolean;
 
+  @Column({
+    type: DataType.BOOLEAN,
+    defaultValue: false,
+    allowNull: false,
+  })
+  externalProvider: boolean;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  provider: string;
+
   @HasMany(() => Comment)
   comment: Comment[];
 }

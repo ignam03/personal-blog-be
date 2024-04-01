@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { CORS } from './constants';
 import { ValidationPipe } from '@nestjs/common';
-import { AuthGuard } from './modules/auth/strategies/auth.gaurd';
+import { AuthGuard } from './modules/auth/guards/auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
