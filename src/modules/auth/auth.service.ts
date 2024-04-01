@@ -6,7 +6,14 @@ import { ErrorManager } from 'src/exceptions/error.manager';
 import { ROLES } from 'src/constants/roles';
 import { generateId } from 'src/utils/utils';
 import { MailService } from '../mail/mail.service';
+import { OAuth2Client } from 'google-auth-library';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
+ConfigModule.forRoot({
+  envFilePath: '.develop.env',
+});
+
+const configService = new ConfigService();
 @Injectable()
 export class AuthService {
   constructor(
@@ -109,6 +116,49 @@ export class AuthService {
       user.token = '';
       user.isActive = true;
       user.save();
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  async loginGoogle(body: any) {
+    try {
+      const client = new OAuth2Client(
+        configService.get<string>('GOOGLE_CLIENT_ID'),
+      );
+      const ticket = await client.verifyIdToken({
+        idToken: body.token,
+        audience: configService.get<string>('GOOGLE_CLIENT_ID'),
+      });
+      const payload = ticket.getPayload();
+      const userByEmail = await this.usersService.fetchByEmail(payload.email);
+      if (userByEmail) {
+        const { ...result } = userByEmail['dataValues'];
+        const token = await this.generateToken(result);
+        return { user: result, token };
+      }
+      const pass = await this.hashPassword(payload.email);
+      const myToken = generateId();
+      console.log(payload);
+      const user = {
+        firstName: payload.name,
+        userName: payload.family_name,
+        email: payload.email,
+        password: pass,
+        token: myToken,
+        role: ROLES.USER,
+        isActive: true,
+        externalProvider: true,
+        provider: 'google',
+        profileImage: payload.picture,
+      };
+      const newUser = await this.usersService.create({
+        ...user,
+      });
+
+      const { password, ...result } = newUser['dataValues'];
+      const token = await this.generateToken(result);
+      return { user: result, token };
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
