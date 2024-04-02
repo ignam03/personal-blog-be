@@ -139,7 +139,6 @@ export class AuthService {
       }
       const pass = await this.hashPassword(payload.email);
       const myToken = generateId();
-      console.log(payload);
       const user = {
         firstName: payload.name,
         userName: payload.family_name,
